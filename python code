@@ -1,0 +1,90 @@
+class Product:
+    def __init__(self, name, price):
+        self.name = name
+        self.price = price
+
+class CartItem:
+    def __init__(self, product, quantity):
+        self.product = product
+        self.quantity = quantity
+        self.next = None
+
+# Global pointer to the cart
+cart = None
+
+# Sample product catalog
+productCatalog = [
+    Product("Product A", 13.99),
+    Product("Product B", 7.99),
+    Product("Product C", 82.49),
+    Product("Product D", 55.99)
+]
+
+# Function to display the product catalog
+def display_catalog():
+    print("Product Catalog:")
+    for i, product in enumerate(productCatalog, 1):
+        print(f"{i}. {product.name} - ${product.price:.2f}")
+
+# Function to add an item to the cart
+def add_to_cart(productIndex, quantity):
+    global cart
+    if productIndex < 0 or productIndex >= len(productCatalog):
+        print("Invalid product index.")
+        return
+
+    newCartItem = CartItem(productCatalog[productIndex], quantity)
+    newCartItem.next = cart
+    cart = newCartItem
+
+    print(f"Added '{productCatalog[productIndex].name}' to cart.")
+
+# Function to display the cart
+def display_cart():
+    print("Cart:")
+    current = cart
+    while current is not None:
+        print(f"{current.product.name} - Quantity: {current.quantity}")
+        current = current.next
+
+# Function to calculate the total price of items in the cart
+def calculate_total():
+    total = 0.0
+    current = cart
+    while current is not None:
+        total += current.product.price * current.quantity
+        current = current.next
+    discount = 0.0
+    couponResponse = input("Do you have a coupon? (y/n): ")
+    if couponResponse == 'y':
+        discount = 5.0
+    total -= discount
+
+    return total
+
+if __name__ == "__main__":
+    choice = 0
+
+    while choice != 5:
+        print("\nE-Commerce Product Catalog:")
+        print("1. Browse Products")
+        print("2. Add Product to Cart")
+        print("3. View Cart")
+        print("4. Proceed to Checkout")
+        print("5. Exit")
+        choice = int(input("Enter your choice: "))
+
+        if choice == 1:
+            display_catalog()
+        elif choice == 2:
+            display_catalog()
+            productIndex = int(input("Enter the product index to add: ")) - 1
+            quantity = int(input("Enter the quantity: "))
+            add_to_cart(productIndex, quantity)
+        elif choice == 3:
+            display_cart()
+        elif choice == 4:
+            print(f"Total Amount: ${calculate_total():.2f}")
+            print("Thank you for shopping!")
+
+    print("Exiting E-Commerce Product Catalog.")
