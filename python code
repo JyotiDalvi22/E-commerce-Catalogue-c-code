@@ -84,6 +84,7 @@ if __name__ == "__main__":
         elif choice == 3:
             display_cart()
         elif choice == 4:
+            display_cart()
             print(f"Total Amount: ${calculate_total():.2f}")
             print("Thank you for shopping!")
 
