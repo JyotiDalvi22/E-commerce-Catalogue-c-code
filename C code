@@ -3,50 +3,50 @@
 #include <string.h>
 
 // Structure to represent a product
-struct Product
-{
+struct Product {
     char name[50];
-    double price;
+    float price;
 };
 
-// Structure to represent an item in the cart
-struct CartItem
-{
+// Structure to represent a cart item
+struct CartItem {
     struct Product product;
     int quantity;
-    struct CartItem *next;
+    struct CartItem* next;
 };
 
 // Global pointer to the cart
-struct CartItem *cart = NULL;
+struct CartItem* cart = NULL;
 
 // Sample product catalog
 struct Product productCatalog[] = {
     {"Product A", 13.99},
     {"Product B", 7.99},
     {"Product C", 82.49},
-    {"Product D", 55.99}};
+    {"Product D", 55.99}
+};
 
 // Function to display the product catalog
-void display_catalog()
-{
+void display_catalog() {
     printf("Product Catalog:\n");
-    for (int i = 0; i < sizeof(productCatalog) / sizeof(productCatalog[0]); ++i)
-    {
+    for (int i = 0; i < sizeof(productCatalog) / sizeof(productCatalog[0]); i++) {
         printf("%d. %s - $%.2f\n", i + 1, productCatalog[i].name, productCatalog[i].price);
     }
 }
 
 // Function to add an item to the cart
-void add_to_cart(int productIndex, int quantity)
-{
-    if (productIndex < 0 || productIndex >= sizeof(productCatalog) / sizeof(productCatalog[0]))
-    {
+void add_to_cart(int productIndex, int quantity) {
+    if (productIndex < 0 || productIndex >= sizeof(productCatalog) / sizeof(productCatalog[0])) {
         printf("Invalid product index.\n");
         return;
     }
 
-    struct CartItem *newCartItem = (struct CartItem *)malloc(sizeof(struct CartItem));
+    struct CartItem* newCartItem = (struct CartItem*)malloc(sizeof(struct CartItem));
+    if (newCartItem == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+
     newCartItem->product = productCatalog[productIndex];
     newCartItem->quantity = quantity;
     newCartItem->next = cart;
@@ -56,91 +56,139 @@ void add_to_cart(int productIndex, int quantity)
 }
 
 // Function to display the cart
-void display_cart()
-{
+void display_cart() {
     printf("Cart:\n");
-    struct CartItem *current = cart;
-    while (current != NULL)
-    {
+    struct CartItem* current = cart;
+    while (current != NULL) {
         printf("%s - Quantity: %d\n", current->product.name, current->quantity);
         current = current->next;
     }
 }
 
 // Function to calculate the total price of items in the cart
-double calculate_total()
-{
-    double total = 0.0;
-    struct CartItem *current = cart;
-    while (current != NULL)
-    {
+float calculate_total() {
+    float total = 0.0;
+    struct CartItem* current = cart;
+    while (current != NULL) {
         total += current->product.price * current->quantity;
         current = current->next;
     }
     float discount = 0.0;
-        printf("Do you have a coupon? (y/n): ");
-        char couponResponse;
-        scanf(" %c", &couponResponse); 
-        if (couponResponse == 'y') {
-            discount = 5.0; 
-        }
-        total -= discount;
+    char couponResponse[2];
+    printf("Do you have a coupon? (y/n): ");
+    scanf("%1s", couponResponse);
+    if (strcmp(couponResponse, "y") == 0) {
+        discount = 5.0;
+    }
+    total -= discount;
 
     return total;
 }
 
-int main()
-{
-    int choice, productIndex, quantity;
+// Function to edit the cart (change quantity or remove product)
+void edit_cart() {
+    display_cart();
+    int productIndex;
+    printf("Enter the product index to edit (0 to cancel): ");
+    scanf("%d", &productIndex);
+    if (productIndex == 0) {
+        return;
+    }
 
-    do
-    {
+    productIndex--;  // Adjust for 0-based index
+
+    if (productIndex < 0 || productIndex >= sizeof(productCatalog) / sizeof(productCatalog[0])) {
+        printf("Invalid product index.\n");
+        return;
+    }
+
+    char action[2];
+    printf("Do you want to (C)hange quantity or (R)emove the product? ");
+    scanf("%1s", action);
+
+    struct CartItem* current = cart;
+    struct CartItem* prev = NULL;
+
+    while (current != NULL) {
+        if (strcmp(current->product.name, productCatalog[productIndex].name) == 0) {
+            if (strcmp(action, "C") == 0 || strcmp(action, "c") == 0) {
+                int new_quantity;
+                printf("Enter the new quantity: ");
+                scanf("%d", &new_quantity);
+                if (new_quantity <= 0) {
+                    printf("Quantity must be greater than 0.\n");
+                    return;
+                }
+                current->quantity = new_quantity;
+                printf("'%s' quantity updated to %d.\n", current->product.name, new_quantity);
+                return;
+            } else if (strcmp(action, "R") == 0 || strcmp(action, "r") == 0) {
+                if (prev == NULL) {
+                    cart = current->next;
+                } else {
+                    prev->next = current->next;
+                }
+                printf("'%s' removed from the cart.\n", current->product.name);
+                free(current);
+                return;
+            } else {
+                printf("Invalid action. Enter 'C' to change quantity or 'R' to remove.\n");
+                return;
+            }
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    printf("'%s' not found in the cart.\n", productCatalog[productIndex].name);
+}
+
+int main() {
+    int choice = 0;
+
+    while (choice != 6) {
         printf("\nE-Commerce Product Catalog:\n");
         printf("1. Browse Products\n");
         printf("2. Add Product to Cart\n");
         printf("3. View Cart\n");
-        printf("4. Proceed to Checkout\n");
-        printf("5. Exit\n");
+        printf("4. Edit Cart\n");
+        printf("5. Proceed to Checkout\n");
+        printf("6. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
-        switch (choice)
-        {
-        case 1:
+        if (choice == 1) {
             display_catalog();
-            break;
-        case 2:
+        } else if (choice == 2) {
             display_catalog();
+            int productIndex, quantity;
             printf("Enter the product index to add: ");
             scanf("%d", &productIndex);
+            productIndex--;
             printf("Enter the quantity: ");
             scanf("%d", &quantity);
-            add_to_cart(productIndex - 1, quantity);
-            break;
-        case 3:
+            add_to_cart(productIndex, quantity);
+        } else if (choice == 3) {
             display_cart();
-            break;
-        case 4:
+        } else if (choice == 4) {
+            edit_cart();
+        } else if (choice == 5) {
             display_cart();
             printf("Total Amount: $%.2f\n", calculate_total());
             printf("Thank you for shopping!\n");
-            break;
-        case 5:
-            printf("Exiting E-Commerce Product Catalog.\n");
-            break;
-        default:
-            printf("Invalid choice. Please enter a valid option.\n");
         }
-    } while (choice != 5);
+    }
 
-    // Free memory (in a real application, you would need to free the cart items)
-    struct CartItem *current = cart;
-    while (current != NULL)
-    {
-        struct CartItem *temp = current;
-        current = current->next;
+    printf("Exiting E-Commerce Product Catalog.\n");
+
+    // Free memory allocated for cart items
+    while (cart != NULL) {
+        struct CartItem* temp = cart;
+        cart = cart->next;
         free(temp);
     }
 
     return 0;
 }
+
+   
