@@ -62,16 +62,60 @@ def calculate_total():
 
     return total
 
+def edit_cart():
+    global cart
+    display_cart()
+    productIndex = int(input("Enter the product index to edit (0 to cancel): "))
+    if productIndex == 0:
+        return
+
+    productIndex -= 1  # Adjust for 0-based index
+
+    if productIndex < 0 or productIndex >= len(productCatalog):
+        print("Invalid product index.")
+        return
+
+    action = input("Do you want to (C)hange quantity or (R)emove the product? ").lower()
+    
+    current = cart
+    prev = None
+
+    while current is not None:
+        if current.product == productCatalog[productIndex]:
+            if action == "c":
+                new_quantity = int(input("Enter the new quantity: "))
+                if new_quantity <= 0:
+                    print("Quantity must be greater than 0.")
+                    return
+                current.quantity = new_quantity
+                print(f"'{current.product.name}' quantity updated to {new_quantity}.")
+                return
+            elif action == "r":
+                if prev is None:
+                    cart = current.next
+                else:
+                    prev.next = current.next
+                print(f"'{current.product.name}' removed from the cart.")
+                return
+            else:
+                print("Invalid action. Enter 'C' to change quantity or 'R' to remove.")
+                return
+        prev = current
+        current = current.next
+
+    print(f"'{productCatalog[productIndex].name}' not found in the cart.")
+
 if __name__ == "__main__":
     choice = 0
 
-    while choice != 5:
+    while choice != 6:
         print("\nE-Commerce Product Catalog:")
         print("1. Browse Products")
         print("2. Add Product to Cart")
         print("3. View Cart")
-        print("4. Proceed to Checkout")
-        print("5. Exit")
+        print("4. Edit Cart")
+        print("5. Proceed to Checkout")
+        print("6. Exit")
         choice = int(input("Enter your choice: "))
 
         if choice == 1:
@@ -84,6 +128,8 @@ if __name__ == "__main__":
         elif choice == 3:
             display_cart()
         elif choice == 4:
+            edit_cart()
+        elif choice == 5:
             display_cart()
             print(f"Total Amount: ${calculate_total():.2f}")
             print("Thank you for shopping!")
