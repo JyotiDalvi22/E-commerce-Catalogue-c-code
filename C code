@@ -77,6 +77,15 @@ double calculate_total()
         total += current->product.price * current->quantity;
         current = current->next;
     }
+    float discount = 0.0;
+        printf("Do you have a coupon? (y/n): ");
+        char couponResponse;
+        scanf(" %c", &couponResponse); 
+        if (couponResponse == 'y') {
+            discount = 5.0; 
+        }
+        total -= discount;
+
     return total;
 }
 
@@ -112,7 +121,7 @@ int main()
             display_cart();
             break;
         case 4:
-            printf("Total: $%.2f\n", calculate_total());
+            printf("Total Amount: $%.2f\n", calculate_total());
             printf("Thank you for shopping!\n");
             break;
         case 5:
