@@ -121,6 +121,7 @@ int main()
             display_cart();
             break;
         case 4:
+            display_cart();
             printf("Total Amount: $%.2f\n", calculate_total());
             printf("Thank you for shopping!\n");
             break;
